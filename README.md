@@ -20,8 +20,8 @@ api_hash = <your api_hash>
 ```
 
 ## How to run
-Easy peasy, just run `python3 main.py` and it'll be listening for all incoming messages from all private chats!.
+Easy peasy, just run `python3 main.py` and it'll be listening for all incoming messages from all private chats!
 
 
 ## Contributing
-Via PRs, **ALL** changes, improvements and new ideas are totally welcome!
+Via PRs from a **feature brach** to **main**. All changes, improvements and new ideas are totally welcome!
