@@ -14,6 +14,8 @@ app = Client(
 
 
 sleeping = False
+last_sleeping_id = -1
+last_awake_id = -1
 
 @app.on_message(filters.private)
 def home(client, message):
@@ -28,22 +30,26 @@ def home(client, message):
 
 
 def message_from_me(name, user, message_id, text):
-    global sleeping
+    global sleeping, last_sleeping_id, last_awake_id
     # Did I message myself? (Saved Messages)
     if(user.username == "casa98" and (text == "Sleeping" or text == "Awake")):
-        if text == "Sleeping":
-            sleeping = True
-            change_bio("I'm sleeping now.")
-        else:
-            sleeping = False
-            change_bio("\U0001F1E8\U0001F1F4")  # Colombian flag
-        
         # Edit the message I sent to myself
         app.edit_message_text(
             chat_id = "me",
             message_id = message_id,
             text = f"You're now **{text}**"
         )
+        
+        if text == "Sleeping":
+            sleeping = True
+            last_sleeping_id = message_id
+            app.delete_messages("me", last_awake_id)
+            change_bio("I'm sleeping now.")
+        else:
+            sleeping = False
+            last_awake_id = message_id
+            app.delete_messages("me", last_sleeping_id)
+            change_bio("\U0001F1E8\U0001F1F4")  # Colombian flag
 
     else:
         if sleeping:
