@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from configparser import ConfigParser
 from pyrogram.handlers import MessageHandler
-from pyrogram.raw import functions
+from pyrogram.raw import functions, types
 
 config = ConfigParser()
 config.read('config.ini')
@@ -45,15 +45,22 @@ def message_from_me(name, user, message_id, text):
             last_sleeping_id = message_id
             app.delete_messages("me", last_awake_id)
             change_bio("I'm sleeping now.")
+            hideTimestamp(hide = True)
+
         else:
             sleeping = False
             last_awake_id = message_id
             app.delete_messages("me", last_sleeping_id)
             change_bio("\U0001F1E8\U0001F1F4")  # Colombian flag
+            hideTimestamp(hide = False)
 
     else:
-        if sleeping:
-            app.send_message(user.id, f"Hey, {name}.\nI'm sleeping right now, I'll reply when it's the real me \U0001F648\U0001F64A")
+        # I'm sleeping and someone mesaged me, send an automatic message
+        # Ignore these isers not to automatically reply if I'm sleeping
+        ignore_users = [703659857, 1057813919]
+        if sleeping and user.id not in ignore_users:
+            app.send_message(user.id, f"Hey {name}, I'm sleeping right now. "
+            "I'll message you when it's the real me \U0001F609\n\n__Regards, my userbot.__")
 
 
 def change_bio(bio):
@@ -62,5 +69,18 @@ def change_bio(bio):
             about = bio
         )
     )
+
+
+def hideTimestamp(hide):
+    hideOrShow = types.InputPrivacyValueDisallowAll() if hide else types.InputPrivacyValueAllowAll()
+    app.send(
+        functions.account.SetPrivacy(
+            key= types.InputPrivacyKeyStatusTimestamp(),
+            rules= [
+                hideOrShow,
+            ]
+        )
+    )
+
 
 app.run()
