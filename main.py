@@ -16,6 +16,10 @@ app = Client(
 sleeping = False
 last_sleeping_id = -1
 last_awake_id = -1
+# I'm sleeping and someone mesaged me, send an automatic message
+# Ignore these isers not to automatically reply if I'm sleeping
+ignore_users = [703659857, 1057813911]
+
 
 @app.on_message(filters.private)
 def home(client, message):
@@ -30,7 +34,7 @@ def home(client, message):
 
 
 def message_from_me(name, user, message_id, text):
-    global sleeping, last_sleeping_id, last_awake_id
+    global sleeping, last_sleeping_id, last_awake_id, ignore_users
     # Did I message myself? (Saved Messages)
     if(user.username == "casa98" and (text == "Sleeping" or text == "Awake")):
         # Edit the message I sent to myself
@@ -54,13 +58,14 @@ def message_from_me(name, user, message_id, text):
             change_bio("\U0001F1E8\U0001F1F4")  # Colombian flag
             hideTimestamp(hide = False)
 
-    else:
-        # I'm sleeping and someone mesaged me, send an automatic message
-        # Ignore these isers not to automatically reply if I'm sleeping
-        ignore_users = [703659857, 1057813919]
-        if sleeping and user.id not in ignore_users:
+    elif sleeping:
+        if user.id not in ignore_users:
+            ignore_users.append(user.id)
             app.send_message(user.id, f"Hey {name}, I'm sleeping right now. "
             "I'll message you when it's the real me \U0001F609\n\n__Regards, my userbot.__")
+        else:
+            # TODO Already replied once. Think of what to do next, or nothing...
+            pass
 
 
 def change_bio(bio):
