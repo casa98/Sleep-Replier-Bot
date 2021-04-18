@@ -26,37 +26,36 @@ ignore_users = [703659857, 1057813911]
 def my_messages(client, message):
     global sleeping, last_sleeping_id, last_awake_id
     message_id = message.message_id
-    print(message)
+    # print(message)
 
     # I'm going to sleep
     if(message.text in const.sleeping):
         sleeping = True
         last_sleeping_id = message_id
-        app.delete_messages("me", last_awake_id)
         change_bio(const.sleeping_bio)
         hideTimestamp(hide = True)
         edit_my_message("me", message_id, const.current_status.format("**sleeping**"))
+        app.delete_messages("me", last_awake_id)
 
     # I woke up
     if(message.text in const.awake):
         sleeping= False
         last_awake_id = message_id
-        app.delete_messages("me", last_sleeping_id)
         change_bio(const.awake_bio)
         hideTimestamp(hide = False)
         edit_my_message("me", message_id, const.current_status.format("**awake**"))
+        app.delete_messages("me", last_sleeping_id)
 
 def edit_my_message(chat_id, message_id, text):
-    app.edit_message_text(
-        chat_id = chat_id,
-        message_id = message_id,
-        text = text
-    )
+    app.edit_message_text(chat_id = chat_id,message_id = message_id,text = text)
 
 
-@app.on_message(filters.private)
+# Recieve all private messages except mine (Saved Messages)
+@app.on_message(filters.private & ~filters.me)
 def home(client, message):
-    if(message.from_user.id not in ignore_users):
+    global sleeping
+    
+    if sleeping and message.from_user.id not in ignore_users:    # Private message receives
         print(message)
 
         name = message.chat.first_name
@@ -68,11 +67,7 @@ def home(client, message):
 
 
 def message_received(name, user, message_id, text):
-    global sleeping
-
-    # I received private messages
-    if sleeping:
-        app.send_message(user.id, const.sleeping_message_1.format(name))
+    app.send_message(user.id, const.sleeping_message_1.format(name))
 
 
 def change_bio(bio):
