@@ -51,7 +51,7 @@ def edit_my_message(chat_id, message_id, text):
 
 
 # Recieve all private messages except mine (Saved Messages)
-@app.on_message(filters.private & ~filters.me)
+@app.on_message(filters.private & ~filters.me & filters.bot)
 def home(client, message):
     global sleeping
     
@@ -78,15 +78,24 @@ def change_bio(bio):
     )
 
 
+
 def hideTimestamp(hide):
     # This function will show/hide last seen to everyone 
-    # FIXME Hide/show only to contacts and make some exceptions if needed
     hideOrShow = types.InputPrivacyValueDisallowAll() if hide else types.InputPrivacyValueAllowAll()
+
+    # Exclude given users from the exception above
+    exludeContacts = types.InputPrivacyValueAllowUsers(
+        users = [
+            #FIXME Works but I don't really know [access_hash] meaning
+            types.InputUser(user_id=1057813911, access_hash=0)
+        ]
+    )
     app.send(
         functions.account.SetPrivacy(
             key= types.InputPrivacyKeyStatusTimestamp(),
             rules= [
                 hideOrShow,
+                exludeContacts
             ]
         )
     )
